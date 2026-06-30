@@ -8,7 +8,10 @@ public interface CategoryService {
 
     List<Category> getAllCategories();
 
-    default void createCategory(Category category) {
+    default void createCategory(Category category){
 
     }
+
+    String deleteCategory(Long categoryId);
+
 }
