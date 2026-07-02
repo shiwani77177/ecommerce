@@ -5,13 +5,19 @@ import com.ecommerce.project.model.Category;
 import java.util.List;
 
 public interface CategoryService {
+    //static Category updateCategory(Category category, Long categoryId) {
+       // return null;
+    //}
 
-    List<Category> getAllCategories();
-
-    default void createCategory(Category category){
-
+    public static Category updateCategory(Category category, Long categoryId) {
+        return null;
     }
 
-    String deleteCategory(Long categoryId);
+    //Category updateCategory(Category category, Long categoryId);
 
+    java.util.List<Category> getAllCategories();
+
+    void createCategory(Category category);
+
+    String deleteCategory(Long categoryId);
 }
