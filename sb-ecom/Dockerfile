@@ -1,27 +1,21 @@
-# ---- Build stage ----
-FROM eclipse-temurin:21-jdk AS build
+# Stage 1: Build the JAR
+FROM eclipse-temurin:17-jdk-alpine AS build
 WORKDIR /app
 
-# Copy the Maven wrapper + pom first so the dependency download
-# becomes its own cached layer (only re-runs when pom.xml changes).
-COPY .mvn/ .mvn/
+# Copy Maven wrapper and configuration
+COPY .mvn/ .mvn
 COPY mvnw pom.xml ./
-RUN chmod +x mvnw && ./mvnw -B dependency:go-offline
 
-# Copy source and build the executable jar (skip tests for image builds)
-COPY src/ src/
-RUN ./mvnw -B clean package -DskipTests
+# Fix permissions for execution inside Linux
+RUN chmod +x mvnw
 
-# ---- Runtime stage ----
-FROM eclipse-temurin:21-jre
+# Copy source code and package application
+COPY src ./src
+RUN ./mvnw clean package -DskipTests
+
+# Stage 2: Minimal runtime environment
+FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
-
-# Run as a non-root user
-RUN useradd --system --uid 1001 spring
-USER spring
-
-# Copy just the built jar from the build stage
 COPY --from=build /app/target/*.jar app.jar
-
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "app.jar"]
