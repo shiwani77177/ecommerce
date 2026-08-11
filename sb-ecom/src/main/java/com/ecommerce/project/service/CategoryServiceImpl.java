@@ -1,13 +1,14 @@
 package com.ecommerce.project.service;
 
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.ecommerce.project.exceptions.APIException;
+import com.ecommerce.project.exceptions.ResourceNotFoundException;
 import com.ecommerce.project.model.Category;
 import com.ecommerce.project.repositories.CategoryRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
-
-import java.util.List;
 
 @Service
 public class CategoryServiceImpl implements CategoryService {
@@ -17,13 +18,20 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public List<Category> getAllCategories() {
-        return categoryRepository.findAll();
+        List<Category> categories = categoryRepository.findAll();
+        if (categories.isEmpty()) {     //Checking if the category is empty or not
+            throw new APIException("No category is created till now.");
+        }
+        return categories;
     }
 
     @Override
     public Category createCategory(Category category) {
-        // Incoming body has no id -> Spring Data persists (INSERT) and
-        // the database's IDENTITY column assigns the id. Never set it by hand.
+        Category savedCategory = categoryRepository.findByCategoryName(category.getCategoryName());
+        if (savedCategory != null) {    //Checking if the same category name already exists
+            throw new APIException("Category with the name " + category.getCategoryName() + " already exists!!!");
+        }
+        //category.setCategoryId(nextId++);
         return categoryRepository.save(category);
     }
 
@@ -31,7 +39,7 @@ public class CategoryServiceImpl implements CategoryService {
     public Category updateCategory(Category category, Long categoryId) {
         // Existence check first so an unknown id is a clean 404 (not a stray insert).
         categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("categoryId",categoryId, "Category"));
         category.setCategoryId(categoryId);
         return categoryRepository.save(category);
     }
@@ -39,7 +47,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public String deleteCategory(Long categoryId) {
         Category category = categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("categoryId",categoryId, "Category"));
         categoryRepository.delete(category);
         return "Category with categoryId " + categoryId + " deleted successfully";
     }

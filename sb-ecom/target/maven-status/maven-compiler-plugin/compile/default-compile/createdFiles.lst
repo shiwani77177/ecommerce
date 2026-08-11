@@ -1,0 +1,6 @@
+com\ecommerce\project\service\CategoryService.class
+com\ecommerce\project\model\Category.class
+com\ecommerce\project\controller\CategoryController.class
+com\ecommerce\project\repositories\CategoryRepository.class
+com\ecommerce\project\SbEcomApplication.class
+com\ecommerce\project\service\CategoryServiceImpl.class
